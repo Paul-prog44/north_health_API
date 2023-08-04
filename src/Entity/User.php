@@ -2,18 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\UsersRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 255)]
     private ?string $gender = null;
 
     #[ORM\Column(length: 255)]
@@ -34,11 +34,11 @@ class Users
     #[ORM\Column]
     private ?int $socialSecurity = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $medicalFileId = null;
-
     #[ORM\Column]
     private ?bool $isAdmin = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?medicalFile $medicalFile = null;
 
     public function getId(): ?int
     {
@@ -129,18 +129,6 @@ class Users
         return $this;
     }
 
-    public function getMedicalFileId(): ?int
-    {
-        return $this->medicalFileId;
-    }
-
-    public function setMedicalFileId(?int $medicalFileId): static
-    {
-        $this->medicalFileId = $medicalFileId;
-
-        return $this;
-    }
-
     public function isIsAdmin(): ?bool
     {
         return $this->isAdmin;
@@ -149,6 +137,18 @@ class Users
     public function setIsAdmin(bool $isAdmin): static
     {
         $this->isAdmin = $isAdmin;
+
+        return $this;
+    }
+
+    public function getMedicalFile(): ?medicalFile
+    {
+        return $this->medicalFile;
+    }
+
+    public function setMedicalFile(?medicalFile $medicalFile): static
+    {
+        $this->medicalFile = $medicalFile;
 
         return $this;
     }
