@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
-use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ReservationRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 class Reservation
@@ -15,14 +16,16 @@ class Reservation
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(["getUsers"])]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?hospitalization $hospitalization = null;
+    #[Groups(["getUsers"])]
+    private ?Hospitalization $hospitalization = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?doctor $doctor = null;
+    private ?Doctor $doctor = null;
 
 
     public function getId(): ?int
@@ -42,24 +45,24 @@ class Reservation
         return $this;
     }
 
-    public function getHospitalization(): ?hospitalization
+    public function getHospitalization(): ?Hospitalization
     {
         return $this->hospitalization;
     }
 
-    public function setHospitalization(?hospitalization $hospitalization): static
+    public function setHospitalization(?Hospitalization $hospitalization): static
     {
         $this->hospitalization = $hospitalization;
 
         return $this;
     }
 
-    public function getDoctor(): ?doctor
+    public function getDoctor(): ?Doctor
     {
         return $this->doctor;
     }
 
-    public function setDoctor(?doctor $doctor): static
+    public function setDoctor(?Doctor $doctor): static
     {
         $this->doctor = $doctor;
 

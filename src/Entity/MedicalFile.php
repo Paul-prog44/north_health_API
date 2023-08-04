@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\MedicalFileRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\MedicalFileRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MedicalFileRepository::class)]
 class MedicalFile
@@ -18,10 +19,12 @@ class MedicalFile
     private ?string $allergies = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["getUsers"])]
     private ?string $documents = null;
 
     #[ORM\ManyToOne]
-    private ?reservation $reservations = null;
+    #[Groups(["getUsers"])]
+    private ?Reservation $reservations = null;
 
     public function getId(): ?int
     {
@@ -53,12 +56,12 @@ class MedicalFile
         return $this;
     }
 
-    public function getReservations(): ?reservation
+    public function getReservations(): ?Reservation
     {
         return $this->reservations;
     }
 
-    public function setReservations(?reservation $reservations): static
+    public function setReservations(?Reservation $reservations): static
     {
         $this->reservations = $reservations;
 

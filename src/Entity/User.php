@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
@@ -11,34 +12,43 @@ class User
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getUsers"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsers"])]
     private ?string $gender = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsers"])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsers"])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsers"])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getUsers"])]
     private ?string $emailAddress = null;
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column]
+    #[Groups(["getUsers"])]
     private ?int $socialSecurity = null;
 
     #[ORM\Column]
+    #[Groups(["getUsers"])]
     private ?bool $isAdmin = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?medicalFile $medicalFile = null;
+    #[Groups(["getUsers"])]
+    private ?MedicalFile $medicalFile = null;
 
     public function getId(): ?int
     {
@@ -141,12 +151,12 @@ class User
         return $this;
     }
 
-    public function getMedicalFile(): ?medicalFile
+    public function getMedicalFile(): ?MedicalFile
     {
         return $this->medicalFile;
     }
 
-    public function setMedicalFile(?medicalFile $medicalFile): static
+    public function setMedicalFile(?MedicalFile $medicalFile): static
     {
         $this->medicalFile = $medicalFile;
 
