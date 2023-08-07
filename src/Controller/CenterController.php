@@ -2,12 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Center;
 use App\Repository\CenterRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CenterController extends AbstractController
@@ -20,7 +23,7 @@ class CenterController extends AbstractController
 
         return new JsonResponse($jsonCenterList, Response::HTTP_OK, [], true);
     }
-    #[Route('/api/center/{id}', name: 'detailCenter', methods:["GET"])]
+    #[Route('/api/centers/{id}', name: 'detailCenter', methods:["GET"])]
     public function getDetailCenter(int $id, CenterRepository $CenterRepository, SerializerInterface $serializer): JsonResponse
     {
         $center = $CenterRepository->find($id);
@@ -31,7 +34,7 @@ class CenterController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/api/center/{id}', name: 'deleteCenter', methods:["DELETE"])]
+    #[Route('/api/centers/{id}', name: 'deleteCenter', methods:["DELETE"])]
     public function deleteCenter(int $id, CenterRepository $CenterRepository, EntityManagerInterface $em): JsonResponse
     {
         $center = $CenterRepository->find($id);
@@ -42,5 +45,18 @@ class CenterController extends AbstractController
 
         }
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+    }
+
+    //Mise à jour des centers
+    #[Route('/api/centers/{id}', name: 'updateCenter', methods:["PUT"])]
+    public function updateCenter(Request $request, SerializerInterface $serializer, Center $currentCenter,
+    EntityManagerInterface $em) : JsonResponse
+
+    {
+        $updatedCenter = $serializer->deserialize($request->getContent(), Center::class, 'json', //recupere le body, on deserialise le json pour hydrater l'objet Center
+        [AbstractNormalizer::OBJECT_TO_POPULATE => $currentCenter]);
+        $em->persist($updatedCenter);
+        $em->flush();
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

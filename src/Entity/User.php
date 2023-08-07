@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
@@ -17,14 +18,18 @@ class User
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers"])]
+    #[Assert\NotBlank(message: "Le genre de l'utilisateur est obligatoire")]
+    #[Assert\Length(min : 1, max:20, minMessage: "Le genre doit faire au moins 1 caractère", maxMessage:"le genre doit faire au plus 20 caractères.")]
     private ?string $gender = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers"])]
+    #[Assert\NotBlank(message: "Le nom de famille de l'utilisateur est obligatoire")]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["getUsers"])]
+    #[Assert\NotBlank(message: "Le prénom de l'utilisateur est obligatoire")]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]

@@ -10,7 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersController extends AbstractController
 {
@@ -53,21 +56,43 @@ class UsersController extends AbstractController
 
     #[Route('/api/users', name: 'createUser', methods:["POST"])]
     public function createUser(Request $request, SerializerInterface $serializer, 
-    EntityManagerInterface $em) : JsonResponse
+    EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator) : JsonResponse
 
     {
         //Conversion du json de la requête dans un objet de la classe user
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
+
+        //verification des erreurs
+        $errors = $validator->validate($user);
+
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'),
+            JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
         $em->persist($user);
         $em->flush();
 
         //Good practice : Renvoie de l'url de l'objet nouvellement créé dans les headers
         $jsonUser = $serializer->serialize($user, 'json', ['groups' => 'getUsers']);
 
-        // $location = $urlGenerator->generate('detailUser', ['id' => $user->getId()], 
-        // UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate('detailUser', ['id' => $user->getId()], 
+        UrlGeneratorInterface::ABSOLUTE_URL);
 
-        return new JsonResponse($jsonUser, Response::HTTP_CREATED, [], true);
+        return new JsonResponse($jsonUser, Response::HTTP_CREATED, ["location" => $location], true);
     }
+
+    #[Route('/api/users/{id}', name: 'updateUser', methods:["PUT"])]
+    public function updateUser(Request $request, SerializerInterface $serializer, User $currentUser,
+    EntityManagerInterface $em) : JsonResponse
+
+    {
+        $updatedUser = $serializer->deserialize($request->getContent(), User::class, 'json',
+    [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUser]);
+    $em->persist($updatedUser);
+    $em->flush();
+    return new JsonResponse(null, Jsonresponse::HTTP_NO_CONTENT);
+    }
+
 
 }
