@@ -2,125 +2,81 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["getUsers"])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
-    #[Assert\NotBlank(message: "Le genre de l'utilisateur est obligatoire")]
-    #[Assert\Length(min : 1, max:20, minMessage: "Le genre doit faire au moins 1 caractère", maxMessage:"le genre doit faire au plus 20 caractères.")]
-    private ?string $gender = null;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
-    #[Assert\NotBlank(message: "Le nom de famille de l'utilisateur est obligatoire")]
-    private ?string $lastName = null;
+    #[ORM\Column]
+    private array $roles = [];
 
-    #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
-    #[Assert\NotBlank(message: "Le prénom de l'utilisateur est obligatoire")]
-    private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
-    private ?string $address = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(["getUsers"])]
-    private ?string $emailAddress = null;
-
-    #[ORM\Column(length: 255)]
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
     private ?string $password = null;
-
-    #[ORM\Column]
-    #[Groups(["getUsers"])]
-    private ?int $socialSecurity = null;
-
-    #[ORM\Column]
-    #[Groups(["getUsers"])]
-    private ?bool $isAdmin = null;
-
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(["getUsers"])]
-    private ?MedicalFile $medicalFile = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getGender(): ?string
+    public function getEmail(): ?string
     {
-        return $this->gender;
+        return $this->email;
     }
 
-    public function setGender(string $gender): static
+    public function setEmail(string $email): static
     {
-        $this->gender = $gender;
+        $this->email = $email;
 
         return $this;
     }
 
-    public function getLastName(): ?string
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->lastName;
+        return (string) $this->email;
     }
 
-    public function setLastName(string $lastName): static
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->lastName = $lastName;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
 
         return $this;
     }
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(string $address): static
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    public function getEmailAddress(): ?string
-    {
-        return $this->emailAddress;
-    }
-
-    public function setEmailAddress(string $emailAddress): static
-    {
-        $this->emailAddress = $emailAddress;
-
-        return $this;
-    }
-
-    public function getPassword(): ?string
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -132,39 +88,12 @@ class User
         return $this;
     }
 
-    public function getSocialSecurity(): ?int
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
     {
-        return $this->socialSecurity;
-    }
-
-    public function setSocialSecurity(int $socialSecurity): static
-    {
-        $this->socialSecurity = $socialSecurity;
-
-        return $this;
-    }
-
-    public function isIsAdmin(): ?bool
-    {
-        return $this->isAdmin;
-    }
-
-    public function setIsAdmin(bool $isAdmin): static
-    {
-        $this->isAdmin = $isAdmin;
-
-        return $this;
-    }
-
-    public function getMedicalFile(): ?MedicalFile
-    {
-        return $this->medicalFile;
-    }
-
-    public function setMedicalFile(?MedicalFile $medicalFile): static
-    {
-        $this->medicalFile = $medicalFile;
-
-        return $this;
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 }

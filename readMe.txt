@@ -1,0 +1,1 @@
+TODO : refaire les classes, créer une entité user basique puis des héritages vers patients, docteurs, admins en joutant : "extends Person"
